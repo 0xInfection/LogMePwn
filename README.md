@@ -4,6 +4,9 @@ A fully automated, reliable, super-fast, mass scanning and validation toolkit fo
 ## How it works?
 LogMePwn works by making use of [Canary Tokens](https://canarytokens.org), which in-turn provides email and webhook notifications to your preferred communication channel. If you have a custom callback server, you can definitely use it too!
 
+## Installation & Usage
+To use the tool, you can grab a binary from the [Releases](https://github.com/0xInfection/LogMePwn/releases) section as per your distribution and use it. If you want to build the tool, you'll need Go >= 1.13. Simple clone the repo and run `go build`.
+
 Here's the basic usage of the tool:
 ```groovy
 $ ./lmp --help
@@ -96,7 +99,17 @@ Use the `-threads` switch to supply the number of threads to use with the tool.
 #### Specifying delay
 Since a lot of HTTP requests are involved, it might be a cumbersome job for the remote host to handle the requests. The `-delay` parameter is here to help you with those cases. You can specify a delay value in seconds -- which will be used be used in between two subsequent requests to the same port on a server.
 
-## Future ideas & roadmap
+## Demo
+To demo the scanner, I make use of a vulnerable setup from [@christophetd](https://twitter.com/christophetd) using docker:
+```groovy
+docker run -p 8080:8080 ghcr.io/christophetd/log4shell-vulnerable-app
+```
+Then I run the tool:
+```groovy
+./lmp -email alerts@testing.site 127.0.0.1:8080
+```
+
+## Ideas & future roadmap
 - [ ] Built-in capability to spin up a custom DNS callback server.
 - [ ] Ability to identify all probable input fields by observing a basic HTTP response.
 

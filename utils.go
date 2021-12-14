@@ -111,7 +111,7 @@ Content-Disposition: form-data; name="redirect_url"
 	if err := json.Unmarshal(mbody, canaryResp); err != nil {
 		log.Fatalln(err.Error())
 	}
-	log.Println(string(mbody))
+	// log.Println(string(mbody))
 	if canaryResp.Error != nil {
 		log.Fatalf("Error getting a Canary Token: %q", canaryResp.ErrorMessage)
 	}
