@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"log"
+	"net/url"
 	"os"
 	"strings"
 	"sync"
@@ -104,9 +105,9 @@ func (p *ProcJob) ProcessHost(port string, wg *sync.WaitGroup) error {
 	headers := make(map[string]string)
 
 	if len(port) < 1 {
-		host = fmt.Sprintf("%s/?s=%s", p.Host, xload)
+		host = fmt.Sprintf("%s/?s=%s", p.Host, url.QueryEscape(xload))
 	} else {
-		host = fmt.Sprintf("%s:%s/?s=%s", p.Host, port, xload)
+		host = fmt.Sprintf("%s:%s/?s=%s", p.Host, port, url.QueryEscape(xload))
 	}
 
 	// if user has supplied a format string for the body

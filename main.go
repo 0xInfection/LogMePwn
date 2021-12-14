@@ -104,7 +104,7 @@ func main() {
 		manageUrl := fmt.Sprintf("https://canarytokens.org/history?token=%s&auth=%s", canaryResp.Token, canaryResp.Auth)
 		log.Printf("Visit '%s' for seeing the triggers of your payloads.", manageUrl)
 	} else {
-		log.Println("Please visit your custom callback server for seeing triggers.")
+		log.Println("Please visit your email/webhook/custom callback server for seeing triggers.")
 	}
 	log.Println("Scan finished at:", dnoe.Local().String())
 	log.Println("Total time taken to scan:", time.Since(tnoe).String())
