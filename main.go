@@ -35,7 +35,7 @@ func main() {
 		flag.PrintDefaults()
 		fmt.Fprintf(os.Stdout, "\nExamples:\n")
 		fmt.Fprint(os.Stdout, "  ./lmp -email alerts@testing.site 1.2.3.4 1.1.1.1:8080\n")
-		fmt.Fprint(os.Stdout, "  ./lmp -token xxxxxxxxxxxxxxxxxx -fbody '<padding_here>%s<padding_here>' -headers X-Custom-Header\n")
+		fmt.Fprint(os.Stdout, "  ./lmp -token xxxxxxxxxxxxxxxxxx -methods POST,PUT -fbody '<padding_here>%s<padding_here>' -headers X-Custom-Header\n")
 		fmt.Fprint(os.Stdout, "  ./lmp -webhook https://webhook.testing.site -file internet-ranges.lst -ports 8000,8888\n")
 		fmt.Fprint(os.Stdout, "  ./lmp -email alerts@testing.site -methods GET,POST,PUT,PATCH,DELETE 1.2.3.4:8880\n\n")
 	}
@@ -50,9 +50,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	if len(email) < 1 && len(webhook) < 1 && len(canaryToken) < 1 {
+	if len(email) < 1 && len(webhook) < 1 && len(canaryToken) < 1 && len(customServer) < 1 {
 		flag.Usage()
-		log.Println("You need to supply either a email or webhook to receive notifications at!")
+		log.Println("You need to supply either a email or webhook or a custom callback server to receive notifications at!")
 		os.Exit(1)
 	}
 
@@ -103,6 +103,8 @@ func main() {
 	if len(canaryResp.Auth) > 0 {
 		manageUrl := fmt.Sprintf("https://canarytokens.org/history?token=%s&auth=%s", canaryResp.Token, canaryResp.Auth)
 		log.Printf("Visit '%s' for seeing the triggers of your payloads.", manageUrl)
+	} else {
+		log.Println("Please visit your custom callback server for seeing triggers.")
 	}
 	log.Println("Scan finished at:", dnoe.Local().String())
 	log.Println("Total time taken to scan:", time.Since(tnoe).String())

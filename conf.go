@@ -27,7 +27,8 @@ var (
 		MaxConnDuration:           3 * time.Second,
 		MaxIdleConnDuration:       2 * time.Second,
 		MaxConnWaitTimeout:        5 * time.Second,
-		// less emphasis on read because at almost all times, we're bound to not get a response and timeout
+		// less emphasis on read because at almost all times
+		// we're bound to not get a response and timeout
 		ReadTimeout: 3 * time.Second,
 		TLSConfig: &tls.Config{
 			InsecureSkipVerify: true,

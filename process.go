@@ -84,7 +84,8 @@ func (p *ProcJob) RunChecks() {
 	// if the user hasn't already supplied a port, we generate
 	// combinations of every default port and spawn a process
 	// for each port
-	if !strings.Contains(p.Host, ":") {
+	if strings.Count(p.Host, ":") != 2 {
+		log.Println("Running for default set of ports.")
 		wg.Add(len(allPorts))
 		for _, port := range allPorts {
 			go p.ProcessHost(port, wg)
@@ -108,26 +109,26 @@ func (p *ProcJob) ProcessHost(port string, wg *sync.WaitGroup) error {
 		host = fmt.Sprintf("%s:%s/?s=%s", p.Host, port, xload)
 	}
 
-	// if user hasn't supplied a format string for the body
+	// if user has supplied a format string for the body
 	if len(hBody) > 0 {
 		body = []byte(fmt.Sprintf(hBody, xload))
 	} else {
 		// these http methods are usually seen to have a body
-		if p.Method == "POST" || p.Method == "PUT" || p.Method == "PATCH" {
-			if useJson {
-				body = []byte(dummyJSON)
-			} else if useXML {
-				body = []byte(dummyXML)
-			} else {
-				body = []byte(xload)
-			}
+		//if p.Method == "POST" || p.Method == "PUT" || p.Method == "PATCH" {
+		if useJson {
+			body = []byte(dummyJSON)
+		} else if useXML {
+			body = []byte(dummyXML)
+		} else {
+			body = []byte(xload)
 		}
+		//}
 	}
 
 	//if user has supplied custom headers for the requests
 	if len(hHeaders) > 0 {
 		for _, xhead := range strings.Split(hHeaders, ",") {
-			headers[xhead] = ""
+			headers[strings.TrimSpace(xhead)] = ""
 		}
 	} else {
 		for _, key := range defaultHTTPHeaders {
