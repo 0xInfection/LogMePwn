@@ -1,5 +1,7 @@
-# Logs2Pwn
+# LogMePwn
 A fully automated, reliable, super-fast, mass scanning and validation toolkit for the Log4J RCE CVE-2021-44228 vulnerability. With enough amount of hardware and threads, it is capable of scanning the entire internet within a day.
+
+![image](https://user-images.githubusercontent.com/39941993/146040886-339d1095-e861-4f1c-a009-b99732462a2b.png)
 
 ## How it works?
 LogMePwn works by making use of [Canary Tokens](https://canarytokens.org), which in-turn provides email and webhook notifications to your preferred communication channel. If you have a custom callback server, you can definitely use it too!
@@ -104,14 +106,22 @@ To demo the scanner, I make use of a vulnerable setup from [@christophetd](https
 ```groovy
 docker run -p 8080:8080 ghcr.io/christophetd/log4shell-vulnerable-app
 ```
-Then I run the tool:
+![image](https://user-images.githubusercontent.com/39941993/146034544-a0c0e60d-00db-44ae-823a-5e5834888108.png)
+
+Then I run the tool against the setup:
 ```groovy
 ./lmp -email alerts@testing.site 127.0.0.1:8080
 ```
+![image](https://user-images.githubusercontent.com/39941993/146034732-5600761b-008e-4119-83ce-b5b0f6686b7d.png)
 
+Which immediately triggered a few DNS lookups visible on the token history page as well as my email:
+
+<img src="https://user-images.githubusercontent.com/39941993/146039240-0d34e4d8-284f-4377-bde3-ea13f9f7f5eb.png" width=49% /> <img src="https://user-images.githubusercontent.com/39941993/146039600-ab2a71b1-ec92-4cef-bae4-f3f46dc2ffd6.png" width=49% />
+                                                                                                                                
 ## Ideas & future roadmap
 - [ ] Built-in capability to spin up a custom DNS callback server.
 - [ ] Ability to identify all probable input fields by observing a basic HTTP response.
+- [ ] Obfuscation payload generation.
 
 ## License & Version
 The tool is licensed under the GNU GPLv3. LogMePwn is currently at v1.0.
