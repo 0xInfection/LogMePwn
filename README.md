@@ -15,7 +15,7 @@ $ ./lmp --help
 
     +---------------------+
     |   L o g M e P w n   |
-    +---------------------+  v1.0
+    +---------------------+  v1.1
 
                 ~ 0xInfection
 Usage:
@@ -165,7 +165,7 @@ Which immediately triggered a few DNS lookups visible on the token history page 
 Please add your comment to [this issue](https://github.com/0xInfection/LogMePwn/issues/1).
 
 ## License & Version
-The tool is licensed under the GNU GPLv3. LogMePwn is currently at v1.0.
+The tool is licensed under the GNU GPLv3. LogMePwn is currently at v1.1.
 
 ## Credits
 Shoutout to the team at [Thinkst Canary](https://canary.tools/) for their amazing Canary Tokens project.

