@@ -62,6 +62,11 @@ func main() {
 
 	fmt.Print(lackofart, "\n\n")
 
+	if commonPorts == "80,443,8080" {
+		log.Println("Running for default set of ports:", commonPorts)
+	} else {
+		log.Println("Running for ports:", commonPorts)
+	}
 	for _, port := range strings.Split(commonPorts, ",") {
 		allPorts = append(allPorts, strings.TrimSpace(port))
 	}

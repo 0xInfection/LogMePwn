@@ -89,10 +89,6 @@ func ProcessHosts() {
 				log.Printf("Found CIDR range: %s. Generating IP addresses...", mhost)
 				for _, ip := range *genCIDRxIPs(mhost) {
 					for _, method := range allMethods {
-						thisTime := time.Now()
-						fmt.Printf("\r%d/%02d/%02d %02d:%02d:%02d Total processed: %d | Current: %s",
-							thisTime.Year(), thisTime.Month(), thisTime.Day(), thisTime.Hour(),
-							thisTime.Minute(), thisTime.Second(), procCount, ip)
 						if !strings.Contains(ip, "://") {
 							ip = fmt.Sprintf("http://%s", ip)
 						}
@@ -100,15 +96,10 @@ func ProcessHosts() {
 							Host:   ip,
 							Method: method,
 						}
-						procCount++
 					}
 				}
 			} else {
 				for _, method := range allMethods {
-					thisTime := time.Now()
-					fmt.Printf("\r%d/%02d/%02d %02d:%02d:%02d Total processed: %d | Current: %s",
-						thisTime.Year(), thisTime.Month(), thisTime.Day(), thisTime.Hour(),
-						thisTime.Minute(), thisTime.Second(), procCount, mhost)
 					if !strings.Contains(mhost, "://") {
 						mhost = fmt.Sprintf("http://%s", mhost)
 					}
@@ -116,7 +107,6 @@ func ProcessHosts() {
 						Host:   mhost,
 						Method: method,
 					}
-					procCount++
 				}
 			}
 		}
@@ -130,7 +120,6 @@ func (p *ProcJob) RunChecks() {
 	// combinations of every default port and spawn a process
 	// for each port
 	if strings.Count(p.Host, ":") != 2 {
-		log.Println("Running for default set of ports.")
 		wg.Add(len(allPorts))
 		for _, port := range allPorts {
 			go p.ProcessHost(port, wg)
@@ -154,8 +143,15 @@ func (p *ProcJob) ProcessHost(port string, wg *sync.WaitGroup) error {
 		host = fmt.Sprintf("%s:%s", p.Host, port)
 	}
 
+	tmphost := strings.Split(host, "://")[1]
+	thisTime := time.Now()
+	fmt.Printf("\r%d/%02d/%02d %02d:%02d:%02d Total processed: %d  |  Current: %s  |  Method: %s",
+		thisTime.Year(), thisTime.Month(), thisTime.Day(), thisTime.Hour(),
+		thisTime.Minute(), thisTime.Second(), procCount, tmphost, p.Method)
+	procCount++
+
 	var dynamicPayloads []string
-	sanitisedDnsName := strings.ReplaceAll(strings.Split(host, "://")[1], ".", "-")
+	sanitisedDnsName := strings.ReplaceAll(tmphost, ".", "-")
 	sanitisedDnsName = strings.ReplaceAll(sanitisedDnsName, ":", "-")
 	sanitisedDnsName = strings.ReplaceAll(sanitisedDnsName, "/", "-")
 	for _, payload := range xload {

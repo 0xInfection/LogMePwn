@@ -54,7 +54,7 @@ var (
     +---------------------+  %s
 
                 ~ 0xInfection`, version)
-	cidrRex = regexp.MustCompile(`(?m)^(?:\d{1,3}\.){3}\d\/(?:\d|[1-2]\d|3[0-2])$`)
+	cidrRex = regexp.MustCompile(`(?m)^(?:\d{1,3}\.){3}\d{1,3}\/(?:\d|[1-2]\d|3[0-2])$`)
 )
 
 type (
