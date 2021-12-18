@@ -95,6 +95,8 @@ You can also specify a payload containing multiple variations of the payload usi
 ./lmp -payload payloads-sample.txt vulnerable.site.com
 ```
 
+> __NOTE:__ This feature doesn't work with Canary Tokens. Canarytokens doesn't support custom DNS formats.
+
 #### Specifying notification channels
 > __NOTE__: If you're supplying a custom payload using `-payload`, specifying a notification channel is __NOT__ necessary. The payload itself should contain your callback server.
 
