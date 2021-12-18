@@ -1,11 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"context"
-	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"os/signal"
 	"strings"
@@ -28,6 +29,8 @@ func main() {
 	flag.StringVar(&hHeaders, "headers", "", "Comma separated list of HTTP headers to use; if empty a default set of headers are used.")
 	flag.StringVar(&hBody, "fbody", "", "Specify a format string to use as the body of the HTTP request.")
 	flag.StringVar(&customServer, "custom-server", "", "Specify a custom callback server.")
+	flag.StringVar(&headFile, "headers-file", "", "Specify a file containing custom set of headers to use in HTTP requests.")
+	flag.StringVar(&customPayload, "payload", "", "Specify a single payload or a file containing list of payloads to use.")
 
 	mainUsage := func() {
 		fmt.Fprint(os.Stdout, lackofart, "\n")
@@ -50,7 +53,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	if len(email) < 1 && len(webhook) < 1 && len(canaryToken) < 1 && len(customServer) < 1 {
+	if len(email) < 1 && len(webhook) < 1 && len(canaryToken) < 1 &&
+		len(customServer) < 1 && len(customPayload) < 1 {
 		flag.Usage()
 		log.Println("You need to supply either a email or webhook or a custom callback server to receive notifications at!")
 		os.Exit(1)
@@ -66,25 +70,27 @@ func main() {
 		allMethods = append(allMethods, strings.TrimSpace(method))
 	}
 
-	// if custom callback server is supplied
-	if len(customServer) < 1 {
-		if len(canaryToken) < 1 {
-			canaryToken = getToken()
-		}
-		xload = fmt.Sprintf(canaryTokenFormat, canaryToken)
-	} else {
-		xload = fmt.Sprintf(genericPayFormat, customServer)
+	if err := processPayloads(); err != nil {
+		log.Fatalln("Failed processing payloads!")
 	}
 
-	if useJson {
-		var dJson struct {
-			S string `json:"s"`
+	// if user has supplied custom header file
+	if len(headFile) > 0 {
+		var tmpXHead []string
+		file, err := os.Open(headFile)
+		if err != nil {
+			log.Fatalln(err.Error())
 		}
-		dJson.S = xload
-		data, _ := json.Marshal(dJson)
-		dummyJSON = string(data)
-	} else if useXML {
-		dummyXML = fmt.Sprintf(`<?xml version="1.0" encoding="utf-8"?><Request>%s</Request>`, xload)
+		scanner := bufio.NewScanner(file)
+		scanner.Split(bufio.ScanLines)
+		for scanner.Scan() {
+			tmpXHead = append(tmpXHead, scanner.Text())
+		}
+		if err := scanner.Err(); err != nil {
+			log.Fatalln(err.Error())
+		}
+		hHeaders = strings.Join(tmpXHead, ",")
+		file.Close()
 	}
 
 	_, cancel := context.WithCancel(context.Background())
@@ -97,15 +103,11 @@ func main() {
 	log.Println("Starting scan at:", tnoe.Local().String())
 	go ProcessHosts()
 
+	rand.Seed(time.Now().UnixNano())
 	initDispatcher(maxConcurrent)
 	dnoe := time.Now()
 	fmt.Print("\n")
-	if len(canaryResp.Auth) > 0 {
-		manageUrl := fmt.Sprintf("https://canarytokens.org/history?token=%s&auth=%s", canaryResp.Token, canaryResp.Auth)
-		log.Printf("Visit '%s' for seeing the triggers of your payloads.", manageUrl)
-	} else {
-		log.Println("Please visit your email/webhook/custom callback server for seeing triggers.")
-	}
+	log.Println("Please visit your email/webhook/custom callback server for seeing triggers.")
 	log.Println("Scan finished at:", dnoe.Local().String())
 	log.Println("Total time taken to scan:", time.Since(tnoe).String())
 	log.Println("LogMePwn is exiting.")

