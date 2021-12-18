@@ -65,7 +65,7 @@ The targets can be specified in two ways, via the command line interface as argu
 __NEW:__ Now you can even pass CIDR ranges to scan! This feature was introduced in v1.1.
 
 Example:
-```
+```s
 ./lmp <other args here> 1.1.1.1:8080 1.2.3.4:80 1.1.2.2:443
 ./lmp <other args here> -file internet-ranges.lst
 ./lmp <other args here> 192.168.0.0/26 1.2.3.4/30
