@@ -1,9 +1,9 @@
 # LogMePwn
-A fully automated, reliable, super-fast, mass scanning and validation toolkit for the Log4J RCE CVE-2021-44228 vulnerability. With enough amount of hardware and threads, it is capable of scanning the entire internet within a day.
+LogMePwn is a fully automated, multi-protocol, reliable, super-fast scanning and validation toolkit for the Log4J RCE CVE-2021-44228 vulnerability.
 
-![image](https://user-images.githubusercontent.com/39941993/146040886-339d1095-e861-4f1c-a009-b99732462a2b.png)
+![image](https://user-images.githubusercontent.com/39941993/147460711-a3e33a41-b687-4788-95ec-260fe0186b50.png)
 
-## How it works?
+## How does it work?
 LogMePwn works by making use of [Canary Tokens](https://canarytokens.org), which in-turn provides email and webhook notifications to your preferred communication channel. If you have a custom callback server, you can definitely use it too!
 
 ## Installation & Usage
