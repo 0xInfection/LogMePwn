@@ -29,18 +29,26 @@ Usage:
         Specify a format string to use as the body of the HTTP request.
   -file string
         Specify a file containing list of hosts to scan.
+  -ftp-ports string
+        Comma separated list of HTTP ports to scan per target. (default "21")
   -headers string
         Comma separated list of HTTP headers to use; if empty a default set of headers are used.
   -headers-file string
         Specify a file containing custom set of headers to use in HTTP requests.
+  -http-methods string
+        Comma separated list of HTTP methods to use while scanning. (default "GET")
+  -http-ports string
+        Comma separated list of HTTP ports to scan per target. (default "80,443,8080")
+  -imap-ports string
+        Comma separated list of IMAP ports to scan per target. (default "143,993")
   -json
         Use body of type JSON in HTTP requests that can contain a body.
-  -methods string
-        Comma separated list of HTTP methods to use while scanning. (default "GET")
   -payload string
         Specify a single payload or a file containing list of payloads to use.
-  -ports string
-        Comma separated list of ports to scan per target. (default "80,443,8080")
+  -protocol string
+        Specify a protocol to test for vulnerabilities. (default "all")
+  -ssh-ports string
+        Comma separated list of SSH ports to scan per target. (default "22")
   -threads int
         Number of threads to use while scanning. (default 10)
   -token string
@@ -57,6 +65,7 @@ Examples:
   ./lmp -token xxxxxxxxxxxxxxxxxx -methods POST,PUT -fbody '<padding_here>%s<padding_here>' -headers X-Custom-Header
   ./lmp -webhook https://webhook.testing.site -file internet-ranges.lst -ports 8000,8888
   ./lmp -email alerts@testing.site -methods GET,POST,PUT,PATCH,DELETE 1.2.3.4:8880
+  ./lmp -protocol imap -custom-server alerts.testing.local 1.2.3.4:143
 ```
 
 ### Specifying protocols
@@ -171,7 +180,7 @@ docker run -p 8080:8080 ghcr.io/christophetd/log4shell-vulnerable-app
 
 Then I run the tool against the setup:
 ```js
-./lmp -email alerts@testing.site 127.0.0.1:8080
+./lmp -email alerts@testing.site -protocol http 127.0.0.1:8080
 ```
 ![image](https://user-images.githubusercontent.com/39941993/146034732-5600761b-008e-4119-83ce-b5b0f6686b7d.png)
 
@@ -193,7 +202,7 @@ Which immediately triggered a few DNS lookups visible on the token history page 
   - CIDR range scanning.
 
 ## Ideas & future roadmap
-Please add your comment to [this issue](https://github.com/0xInfection/LogMePwn/issues/1).
+Feel free to hit me up on [Twitter](https://twitter.com/0xinfection) or create an issue or PR.
 
 ## License & Version
 The tool is licensed under the GNU GPLv3. LogMePwn is currently at v2.0.
