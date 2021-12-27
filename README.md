@@ -1,7 +1,17 @@
 # LogMePwn
 LogMePwn is a fully automated, multi-protocol, reliable, super-fast scanning and validation toolkit for the Log4J RCE CVE-2021-44228 vulnerability.
 
-![image](https://user-images.githubusercontent.com/39941993/147460711-a3e33a41-b687-4788-95ec-260fe0186b50.png)
+![image](https://user-images.githubusercontent.com/39941993/147484381-65b7e94a-9d71-41fe-a1d4-edc8afbedcf7.png)
+
+## Tool Highlights
+- Inherent support for automatic Canary Tokens generation using emails or webhooks.
+- Multi-protocol support: HTTP, IMAP, SSH, FTP, etc.
+- Support for multiple HTTP methods (GET, POST, PUT, DELETE, PATCH, etc) 
+- Customized HTTP request body fuzzing (JSON, XML, etc).
+- Custom callback server and payload support.
+- CIDR range scanning.
+- Everything is multi-threaded and super fast (its written in Go).
+- ...and many more. Checkout the documentation and the tool below!
 
 ## How does it work?
 LogMePwn works by making use of [Canary Tokens](https://canarytokens.org), which in-turn provides email and webhook notifications to your preferred communication channel. If you have a custom callback server, you can definitely use it too!
@@ -77,7 +87,7 @@ With latest version support for multiple protocols has been introduced. So far w
 - SSH
 - FTP
 
-If you do not specify a protocol via the `-proto` argument, the tool will run all the plugins against the default set of ports mentioned.
+If you do not specify a protocol via the `-protocol` argument, the tool will run all the plugins for every supported protocol against the default set of ports mentioned.
 
 [_See how to control ports for every protocol._](#specifying-targets)
 
