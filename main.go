@@ -24,13 +24,17 @@ func main() {
 	flag.StringVar(&webhook, "webhook", "", "Webhook to use for receiving callback notifications.")
 	flag.StringVar(&userAgent, "user-agent", "", "Custom user-agent string to use; if empty, payloads will be used.")
 	flag.StringVar(&urlFile, "file", "", "Specify a file containing list of hosts to scan.")
-	flag.StringVar(&commonPorts, "ports", "80,443,8080", "Comma separated list of ports to scan per target.")
-	flag.StringVar(&hMethods, "methods", "GET", "Comma separated list of HTTP methods to use while scanning.")
+	flag.StringVar(&commonHTTPPorts, "http-ports", "80,443,8080", "Comma separated list of HTTP ports to scan per target.")
+	flag.StringVar(&commonFTPPorts, "ftp-ports", "21", "Comma separated list of HTTP ports to scan per target.")
+	flag.StringVar(&commonIMAPPorts, "imap-ports", "143,993", "Comma separated list of IMAP ports to scan per target.")
+	flag.StringVar(&commonSSHPorts, "ssh-ports", "22", "Comma separated list of SSH ports to scan per target.")
+	flag.StringVar(&hMethods, "http-methods", "GET", "Comma separated list of HTTP methods to use while scanning.")
 	flag.StringVar(&hHeaders, "headers", "", "Comma separated list of HTTP headers to use; if empty a default set of headers are used.")
 	flag.StringVar(&hBody, "fbody", "", "Specify a format string to use as the body of the HTTP request.")
 	flag.StringVar(&customServer, "custom-server", "", "Specify a custom callback server.")
 	flag.StringVar(&headFile, "headers-file", "", "Specify a file containing custom set of headers to use in HTTP requests.")
 	flag.StringVar(&customPayload, "payload", "", "Specify a single payload or a file containing list of payloads to use.")
+	flag.StringVar(&proto, "protocol", "all", "Specify a protocol to test for vulnerabilities.")
 
 	mainUsage := func() {
 		fmt.Fprint(os.Stdout, lackofart, "\n")
@@ -40,7 +44,8 @@ func main() {
 		fmt.Fprint(os.Stdout, "  ./lmp -email alerts@testing.site 1.2.3.4 1.1.1.1:8080\n")
 		fmt.Fprint(os.Stdout, "  ./lmp -token xxxxxxxxxxxxxxxxxx -methods POST,PUT -fbody '<padding_here>%s<padding_here>' -headers X-Custom-Header\n")
 		fmt.Fprint(os.Stdout, "  ./lmp -webhook https://webhook.testing.site -file internet-ranges.lst -ports 8000,8888\n")
-		fmt.Fprint(os.Stdout, "  ./lmp -email alerts@testing.site -methods GET,POST,PUT,PATCH,DELETE 1.2.3.4:8880\n\n")
+		fmt.Fprint(os.Stdout, "  ./lmp -email alerts@testing.site -methods GET,POST,PUT,PATCH,DELETE 1.2.3.4:8880\n")
+		fmt.Fprint(os.Stdout, "  ./lmp -protocol imap -custom-server alerts.testing.local 1.2.3.4:143\n\n")
 	}
 	flag.Usage = mainUsage
 	flag.Parse()
@@ -62,19 +67,26 @@ func main() {
 
 	fmt.Print(lackofart, "\n\n")
 
-	if commonPorts == "80,443,8080" {
-		log.Println("Running for default set of ports:", commonPorts)
-	} else {
-		log.Println("Running for ports:", commonPorts)
+	if proto == "all" {
+		log.Println("Running for all protocols...")
 	}
-	for _, port := range strings.Split(commonPorts, ",") {
-		allPorts = append(allPorts, strings.TrimSpace(port))
+	for _, port := range strings.Split(commonHTTPPorts, ",") {
+		allHTTPPorts = append(allHTTPPorts, strings.TrimSpace(port))
 	}
-
+	for _, port := range strings.Split(commonIMAPPorts, ",") {
+		allIMAPPorts = append(allIMAPPorts, strings.TrimSpace(port))
+	}
+	for _, port := range strings.Split(commonSSHPorts, ",") {
+		allSSHPorts = append(allSSHPorts, strings.TrimSpace(port))
+	}
+	for _, port := range strings.Split(commonFTPPorts, ",") {
+		allFTPPorts = append(allFTPPorts, strings.TrimSpace(port))
+	}
 	for _, method := range strings.Split(hMethods, ",") {
 		allMethods = append(allMethods, strings.TrimSpace(method))
 	}
 
+	log.Println("Pre-processing payloads to use...")
 	if err := processPayloads(); err != nil {
 		log.Fatalln("Failed processing payloads!")
 	}
