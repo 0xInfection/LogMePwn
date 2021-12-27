@@ -1,3 +1,7 @@
+---------
+CHANGELOG
+---------
+
 * Updates in version v2.0:
     - Introducing multi-protocol support. Protocols implemented so far:
         + SSH
