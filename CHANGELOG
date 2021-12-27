@@ -1,0 +1,15 @@
+* Updates in version v2.0:
+    - Introducing multi-protocol support. Protocols implemented so far:
+        + SSH
+        + IMAP
+        + HTTP
+        + FTP
+
+* Updates in version v1.1:
+    - Ability to specify custom payloads via file or command line.
+    - Ability to specify custom headers via file.
+    - CIDR range scanning.
+
+* Initial release v1.0:
+    - Basic scanning ability on HTTP.
+    - Super-fast, multi-threaded functionality.
