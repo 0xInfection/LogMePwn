@@ -10,6 +10,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"strings"
 
 	"github.com/valyala/fasthttp"
 )
@@ -153,7 +154,7 @@ func incrementIP(ip net.IP) {
 	}
 }
 
-func getPayloads() *[]string {
+func getUserPayloads() *[]string {
 	var payloads []string
 	if _, err := os.Stat(customPayload); err != nil {
 		// user has supplied a single payload
@@ -182,13 +183,15 @@ func getPayloads() *[]string {
 func processPayloads() error {
 	// if user has supplied a custom payload (which will include their hostname)
 	if len(customPayload) > 0 {
-		xload = *getPayloads()
+		xload = *getUserPayloads()
+		log.Println("Using payloads:", xload)
 		return nil
 	}
 
 	// if user has callback server, we use the default payload scheme
 	if len(customServer) > 0 {
 		xload = append(xload, fmt.Sprintf(genericPayFormat, customServer))
+		log.Println("Using payloads:", xload)
 		return nil
 	}
 
@@ -201,5 +204,48 @@ func processPayloads() error {
 		}
 	}
 	xload = append(xload, fmt.Sprintf(canaryTokenFormat, canaryToken))
+	log.Println("Using payloads:", xload)
 	return nil
+}
+
+func queueHosts(ip string) {
+	if proto == "all" || strings.ToLower(proto) == "http" {
+		for _, method := range allMethods {
+			if !strings.Contains(ip, "://") {
+				ip = fmt.Sprintf("http://%s", ip)
+			}
+			ProcChan <- &ProcJob{
+				Host:     ip,
+				Method:   method,
+				Protocol: "HTTP",
+			}
+		}
+	}
+	if proto == "all" || strings.ToLower(proto) == "ssh" {
+		if strings.Contains(ip, "://") {
+			ip = strings.Split(ip, "://")[1]
+		}
+		ProcChan <- &ProcJob{
+			Host:     ip,
+			Protocol: "SSH",
+		}
+	}
+	if proto == "all" || strings.ToLower(proto) == "imap" {
+		if strings.Contains(ip, "://") {
+			ip = strings.Split(ip, "://")[1]
+		}
+		ProcChan <- &ProcJob{
+			Host:     ip,
+			Protocol: "IMAP",
+		}
+	}
+	if proto == "all" || strings.ToLower(proto) == "ftp" {
+		if strings.Contains(ip, "://") {
+			ip = strings.Split(ip, "://")[1]
+		}
+		ProcChan <- &ProcJob{
+			Host:     ip,
+			Protocol: "FTP",
+		}
+	}
 }

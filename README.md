@@ -10,12 +10,12 @@ LogMePwn works by making use of [Canary Tokens](https://canarytokens.org), which
 To use the tool, you can grab a binary from the [Releases](https://github.com/0xInfection/LogMePwn/releases) section as per your distribution and use it. If you want to build the tool, you'll need Go >= 1.13. Simple clone the repo and run `go build`.
 
 Here's the basic usage of the tool:
-```groovy
+```powershell
 $ ./lmp --help
 
     +---------------------+
     |   L o g M e P w n   |
-    +---------------------+  v1.1
+    +---------------------+  v2.0
 
                 ~ 0xInfection
 Usage:
@@ -59,7 +59,27 @@ Examples:
   ./lmp -email alerts@testing.site -methods GET,POST,PUT,PATCH,DELETE 1.2.3.4:8880
 ```
 
-#### Specifying targets
+### Specifying protocols
+__NEW:__ This feature was introduced in v2.0.
+
+With latest version support for multiple protocols has been introduced. So far we have 4 different protocols:
+- HTTP
+- IMAP
+- SSH
+- FTP
+
+If you do not specify a protocol via the `-proto` argument, the tool will run all the plugins against the default set of ports mentioned.
+
+[_See how to control ports for every protocol._](#specifying-targets)
+
+Example:
+```powershell
+./lmp -protocol ftp -custom-server alerts.testing.local 1.2.3.4:21
+./lmp -protocol ssh -custom-server alerts.testing.local 1.2.3.4:22
+./lmp -token xxxxxxxxxxxxxxxx 1.2.3.4 # scans for all protocols on default ports
+```
+
+### Specifying targets
 The targets can be specified in two ways, via the command line interface as arguments, or via a file.
 
 __NEW:__ Now you can even pass CIDR ranges to scan! This feature was introduced in v1.1.
@@ -70,12 +90,16 @@ Example:
 ./lmp <other args here> -file internet-ranges.lst
 ./lmp <other args here> 192.168.0.0/26 1.2.3.4/30
 ```
-The hosts can may contain ports, if not, the set of ports mentioned in `-ports` will be considered for scanning. The default ports list are:
-- 80
-- 443
-- 8080
 
-#### Specifying payloads
+Every protocol has a default supported list of ports associated which can be fine-tuned using the following flags:
+- `-http-ports` for HTTP.
+- `-imap-ports` for IMAP.
+- `-ssh-ports` for SSH.
+- `-ftp-ports` for FTP.
+
+If the user mentions a host+port pair in form of `host:port`, the default list of ports is discarded and all checks are done for that specific port. If `-protocol` is not mentioned, all protocols' plugins will be tested against the same port.
+
+### Specifying payloads
 _This feature was introduced in v1.1._
 
 You can specify a payload directly via the `-payload` argument directly. However if you want the DNS name of the host which is being tested in the payload, you can specify a formatting directive `$DNSNAME$` which will be replaced with the target against which the payload is being tested.
@@ -97,7 +121,7 @@ You can also specify a payload containing multiple variations of the payload usi
 
 > __NOTE:__ This feature doesn't work with Canary Tokens. Canarytokens doesn't support custom DNS formats.
 
-#### Specifying notification channels
+### Specifying notification channels
 > __NOTE__: If you're supplying a custom payload using `-payload`, specifying a notification channel is __NOT__ necessary. The payload itself should contain your callback server.
 
 The notification channels can be any of the following:
@@ -111,7 +135,7 @@ If you already have a token, you can use the `-token` argument to use the token 
 
 > __NOTE:__ If you supply either an email or a webhook, the tool will create a custom canary token. If you use a custom callback server, tokens do not come into play.
 
-#### Sending requests
+### Sending requests
 The tool offers great flexibility when sending requests. By default the tool uses GET requests. A default set of headers are used, each of which contains a payload in its value. You can specify a custom set of headers via the `-headers` argument. You can use the `-headers-file` switch to supply a file containing a list of headers. Examples:
 ```groovy
 ./lmp <other args> -headers 'X-Api-Version' 1.2.3.4:8080
@@ -130,12 +154,12 @@ By default the tool sends a payload directly via the body. The tool offers custo
 
 You can specify a custom user-agent header value via the `-user-agent` switch.
 
-#### Concurrent scanning
+### Concurrent scanning
 The tool is optimized for scanning a wide range of targets. With sufficient amount of network bandwidth and hardware, you can scan the entire IPv4 space within a day. The default number of concurrent threads to use while scanning is set at just 10 (optimised for reliability on local hardware). The value can go upto thousands (I'll leave the benchmarking task upto you). :)
 
 Use the `-threads` switch to supply the number of threads to use with the tool.
 
-#### Specifying delay
+### Specifying delay
 Since a lot of HTTP requests are involved, it might be a cumbersome job for the remote host to handle the requests. The `-delay` parameter is here to help you with those cases. You can specify a delay value in seconds -- which will be used be used in between two subsequent requests to the same port on a server.
 
 ## Demo
@@ -155,7 +179,14 @@ Which immediately triggered a few DNS lookups visible on the token history page 
 
 <img src="https://user-images.githubusercontent.com/39941993/146039240-0d34e4d8-284f-4377-bde3-ea13f9f7f5eb.png" width=49% /> <img src="https://user-images.githubusercontent.com/39941993/146039600-ab2a71b1-ec92-4cef-bae4-f3f46dc2ffd6.png" width=49% />
 
-### New Updates
+### Changelog
+- Updates in version v2.0:
+  - Introducing multi-protocol support. Protocols implemented so far:
+    - SSH
+    - IMAP
+    - HTTP
+    - FTP
+
 - Updates in version v1.1:
   - Ability to specify custom payloads via file or command line.
   - Ability to specify custom headers via file.
@@ -165,7 +196,7 @@ Which immediately triggered a few DNS lookups visible on the token history page 
 Please add your comment to [this issue](https://github.com/0xInfection/LogMePwn/issues/1).
 
 ## License & Version
-The tool is licensed under the GNU GPLv3. LogMePwn is currently at v1.1.
+The tool is licensed under the GNU GPLv3. LogMePwn is currently at v2.0.
 
 ## Credits
 Shoutout to the team at [Thinkst Canary](https://canary.tools/) for their amazing Canary Tokens project.
